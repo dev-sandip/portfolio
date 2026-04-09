@@ -1,0 +1,131 @@
+---
+title: "Handling Image Uploads with ImageKit in Node.js"
+date: 2024-07-15
+oneLiner: "A comprehensive guide to managing image uploads in a Node.js application using ImageKit"
+tags: ["imagekit", "nodejs", "file-uploads", "media-management"]
+contentType: "note"
+---
+
+📸 Managing image uploads efficiently is crucial for any application that handles media files. In this blog post, we'll explore how to set up and use ImageKit, a robust media management solution, for handling image uploads in a Node.js application. We'll walk through the configuration and implementation of key functions like uploading and deleting images.
+
+## Setting Up ImageKit 🛠️
+
+To begin, you need to install the ImageKit SDK. You can do this via npm:
+
+```bash
+npm install imagekit
+```
+
+Next, you need to set up your configuration file to initialize ImageKit with your credentials. Ensure you have your `publicKey`, `privateKey`, and `urlEndpoint` from your ImageKit account.
+
+### Configuration File 🗄️
+
+Create a configuration file (`config/imageKit.ts`) and add the following code:
+
+```typescript
+import ImageKit from 'imagekit';
+
+const imageKit = new ImageKit({
+  publicKey: process.env.IMAGE_KIT_PUBLIC_KEY || '',
+  privateKey: process.env.IMAGE_KIT_PRIVATE_KEY || '',
+  urlEndpoint: process.env.IMAGE_KIT_ENDPOINT || '',
+});
+
+export default imageKit;
+```
+
+This configuration file initializes ImageKit with the necessary credentials from environment variables, ensuring your keys are kept secure. 🔒
+
+## Implementing Image Handling Functions 🖼️
+
+With ImageKit configured, we can now create functions to handle image uploads and deletions.
+
+### Uploading Images ⬆️
+
+Create a file (`services/imageService.ts`) and add the following code to handle image uploads:
+
+```typescript
+import imageKit from '../config/imageKit';
+
+const uploadImage = (
+  file: string | Buffer,
+  fileName: string,
+  folder: string
+): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    imageKit.upload(
+      {
+        file,
+        fileName,
+        folder,
+      },
+      (err, result) => {
+        if (err) {
+          reject(err.message);
+        } else {
+          resolve(result);
+        }
+      }
+    );
+  });
+};
+
+export { uploadImage };
+```
+
+This function takes three parameters: `file`, `fileName`, and `folder`. It uploads the file to the specified folder in your ImageKit account and returns the result or an error message. 🚀
+
+### Deleting Images 🗑️
+
+In the same `imageService.ts` file, add the following code to handle image deletions:
+
+```typescript
+const deleteImage = (fileId: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    imageKit.deleteFile(fileId, (err, result) => {
+      if (err) {
+        reject(err.message);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
+export { uploadImage, deleteImage };
+```
+
+This function takes a `fileId` parameter, which is the unique identifier for the file in ImageKit, and deletes the specified image. 🗑️
+
+## Using the Image Handling Functions 💻
+
+To use these functions in your application, simply import them and call them as needed. Here's an example of how to use the `uploadImage` function:
+
+```typescript
+import { Request, Response } from 'express';
+import { uploadImage } from './services/imageService';
+
+const upload = async (req: Request, res: Response) => {
+  try {
+    const file = req.files?.image; // assuming you're using a middleware like multer
+    if (!file) {
+      throw new Error('No file uploaded');
+    }
+
+    const fileName = file.name;
+    const folder = '/uploads';
+
+    const result = await uploadImage(file.data, fileName, folder);
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+```
+
+In this example, we assume you're using a middleware like `multer` to handle multipart form data. The image is uploaded, and the response is sent back with the upload result. 📨
+
+## Conclusion 🎉
+
+By setting up ImageKit and implementing these functions, you can easily handle image uploads and deletions in your Node.js application. This setup ensures your media files are managed efficiently and securely, allowing you to focus on building great features for your users. 👩‍💻👨‍💻
+![ThankYou](https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNThjZ3B1c2E2dDV5am5xdmR1YzZ0djVubmt6dDlub3Vka2puOWgwbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5xtDarmwsuR9sDRObyU/giphy.gif)

@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "name": "aces-website",
+    "date": "2025",
+    "skills": ["Next.js", "TypeScript", "ClerkJS", "Tailwind CSS", "Shadcn UI", "ImageKit"],
+    "oneLiner": "Official website for ACES with event and member management",
+    "description": "- Developed backend infrastructure for ACES official website\n- Managed events, member profiles, and resource sharing\n- Focused on scalability and clean API design",
+    "cover": "/src/assets/projects/aces.png",
+    "links": {
+      "live": "https://aces.ioepc.edu.np",
+      "github": "https://github.com/dev-sandip/"
+    }
+  },
+  {
+    "id": 2,
+    "name": "student-tiffin",
+    "date": "2025",
+    "skills": ["Node.js", "Express.js", "MongoDB", "Stripe"],
+    "oneLiner": "E-commerce platform for student meals",
+    "description": "- Built a full backend system for meal ordering platform\n- Integrated Stripe for secure payments\n- Designed REST APIs for product, order, and user management",
+    "cover": "/src/assets/projects/student-tiffin.png",
+    "links": {
+      "live": "https://studentstiffin.ie"
+    }
+  }
+]

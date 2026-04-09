@@ -1,0 +1,68 @@
+[
+  {
+    "id": "saypatri",
+    "company": "Saypatri Group",
+    "companyLink": "https://sayapatrigroup.com.np",
+    "avatar": "/src/assets/logos/company/saypatri.png",
+    "location": "Nepal",
+    "positions": [
+      {
+        "title": "Backend Developer",
+        "startDate": "Oct 2025",
+        "endDate":" Dec 2025",
+        "description": "- Developing backend services for high-traffic e-commerce platforms\n- Working with **Node.js** and **PostgreSQL** for scalable systems\n- Designing efficient APIs and handling real-world production challenges"
+      }
+    ]
+  },
+  {
+    "id": "mitra",
+    "company": "Mitra Consultancy",
+    "companyLink": "https://mitra-consultancy.co.in",
+    "avatar": "/src/assets/logos/company/mitr.webp",
+    "location": "Nepal",
+    "positions": [
+      {
+        "title": "Backend Developer (Node.js)",
+        "startDate": "Feb 2025",
+        "endDate": "Oct 2025",
+        "description": "- Building backend systems using **Node.js**\n- Working on real-world applications and improving system performance"
+      },
+      {
+        "title": "Node.js Intern",
+       "startDate": "Jun 2024",
+        "endDate": "Feb 2025",
+        "description": "- Assisted in building RESTful APIs and microservices\n- Used **Express.js** and **MongoDB** in client projects\n- Gained foundational backend development experience"
+      }
+    ]
+  },
+  {
+    "id": "aces",
+    "company": "ACES",
+    "companyLink": "https://www.aceserc.org",
+    "avatar": "/src/assets/logos/company/aces.webp",
+    "location": "Nepal",
+    "positions": [
+      {
+        "title": "Technical Coordinator",
+        "startDate": "Feb 2024",
+        "endDate": "Feb 2025",
+        "description": "- Led technical initiatives and organized workshops\n- Mentored junior members and collaborated on projects"
+      }
+    ]
+  },
+  {
+    "id": "delta",
+    "company": "DELTA",
+    "companyLink": "https://delta.ioepc.edu.np",
+    "avatar": "/src/assets/logos/company/delta.png",
+    "location": "Nepal",
+    "positions": [
+      {
+        "title": "Public Relations and Marketing Assistant",
+        "startDate": "Jan 2024",
+        "endDate": "Mar 2024",
+        "description": "- Managed social media campaigns\n- Built relationships to improve community engagement"
+      }
+    ]
+  }
+]

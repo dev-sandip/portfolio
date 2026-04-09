@@ -1,0 +1,25 @@
+---
+import { Moon, SunMedium } from '@lucide/astro';
+---
+
+<button
+  id="theme-toggle"
+  aria-label="Toggle theme"
+  class="secondary-link cursor-pointer"
+>
+  <SunMedium class="hidden dark:block w-4 h-4" />
+  <Moon class="block dark:hidden w-4 h-4" />
+</button>
+
+<script>
+  function initThemeToggle() {
+    const themeToggle = document.getElementById('theme-toggle');
+
+    themeToggle?.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  }
+  initThemeToggle();
+  document.addEventListener('astro:after-swap', initThemeToggle);
+</script>

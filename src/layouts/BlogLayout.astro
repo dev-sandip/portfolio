@@ -1,0 +1,161 @@
+---
+import { getFormattedDate } from "../utils/helpers";
+import { tagToSlug } from "../utils/tags";
+import BaseLayout from "./BaseLayout.astro";
+import Prose from "../components/Prose.astro";
+import MobileToc from "../components/MobileToc.astro";
+import CopyEmail from "../components/CopyEmail.astro";
+
+const { frontmatter, headings = [] } = Astro.props;
+---
+
+<BaseLayout pageTitle="Blog" tabTitle={frontmatter.title} wideLayout={true}>
+  <div class="grid grid-cols-1 lg:grid-cols-[250px_1fr_250px] gap-8 grow">
+    <aside class="hidden lg:block">
+      {
+        headings.length > 0 ?
+          (<nav class="sticky top-4 flex flex-col gap-y-8">
+            <div>
+              <h2 class="text-sm font-bold mb-4 text-muted">Table of Contents</h2>
+                <ul class="flex flex-col gap-y-2 text-sm" id="toc-list">
+                  {headings.map((heading: any) => (
+                    <li 
+                      style={`margin-left: ${(heading.depth - 2) * 12}px`
+                    }>
+                      <a
+                        href={`#${heading.slug}`}
+                        data-heading-id={heading.slug}
+                        class="toc-link text-subtle hover:text-secondary transition-colors duration-200"
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+            </div>
+          </nav>)
+        : null
+      }
+    </aside>
+
+    <div class="flex flex-col gap-y-8 max-w-[640px] mx-auto w-full">
+      <div class="flex flex-col gap-y-2">
+        <a href="/blog" class="link text-sm">← Back</a>
+
+        <h1 class="text-2xl">{frontmatter.title}</h1>
+        <div class="text-muted text-sm flex gap-x-1">
+          <span>
+            {getFormattedDate(frontmatter.date)}
+          </span>
+          <span>
+            &middot;
+          </span>
+        {
+        frontmatter.tags.length > 0 ? (
+          <div class="flex gap-x-2">[
+            {
+              frontmatter.tags.map((tag: string) => (
+                <a href={`/blog/tags/${tagToSlug(tag)}`} class="link">
+                  #{tag}
+                </a>
+              ))
+            }]
+            </div>
+          ) : null
+        }
+        </div>
+      </div>
+
+      {frontmatter.contentType === 'note' ? (
+        <div class="flex flex-col bg-success gap-y-2 p-3 rounded-md">
+          <p>
+            Checkout the <a
+            href={frontmatter.link}
+            class="link font-bold"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Resource</a> here.
+          </p>
+
+          <p>
+            Thankful to <a
+            href={frontmatter.authorLink}
+            class="link font-bold"
+            target="_blank"
+            rel="noopener noreferrer"
+            >{frontmatter.author}</a> for putting this out there.
+          </p>
+        </div>
+      ) : undefined }
+
+      <MobileToc headings={headings} />
+
+      <div class="flex flex-col gap-y-4">
+        <Prose>
+          <slot />
+        </Prose>
+      </div>
+
+      <div class="text-sm text-center">
+        <span class="text-muted">
+          I'd love to hear your thoughts. Email me at <CopyEmail />
+        </span>
+      </div>
+    </div>
+    
+    <div class="hidden lg:block"></div>
+  </div>
+
+  <script>
+    function initTocHighlight() {
+      const tocLinks = document.querySelectorAll<HTMLAnchorElement>('#toc-list a[data-heading-id]');
+      if (!tocLinks.length) return;
+
+      const headingIds = Array.from(tocLinks).map(link => link.dataset.headingId!);
+      const headingElements = headingIds
+        .map(id => document.getElementById(id))
+        .filter((el): el is HTMLElement => el !== null);
+
+      if (!headingElements.length) return;
+
+      let activeId: string | null = null;
+      const visibleIds = new Set<string>();
+
+      function updateActive() {
+        const topmost = headingElements.find(el => visibleIds.has(el.id));
+        const id = topmost?.id ?? null;
+        if (!id || id === activeId) return;
+        activeId = id;
+        tocLinks.forEach(link => {
+          if (link.dataset.headingId === id) {
+            link.classList.remove('text-subtle');
+            link.classList.add('text-secondary', 'font-medium');
+          } else {
+            link.classList.remove('text-secondary', 'font-medium');
+            link.classList.add('text-subtle');
+          }
+        });
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              visibleIds.add(e.target.id);
+            } else {
+              visibleIds.delete(e.target.id);
+            }
+          });
+          updateActive();
+        },
+        { rootMargin: '0px 0px -50% 0px', threshold: 0 }
+      );
+
+      headingElements.forEach(el => observer.observe(el));
+    }
+
+    initTocHighlight();
+    document.addEventListener('astro:after-swap', initTocHighlight);
+  </script>
+
+</BaseLayout>

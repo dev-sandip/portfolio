@@ -1,0 +1,33 @@
+---
+import NavLink from "./NavLink.astro"
+import ThemeToggle from "./ThemeToggle.astro"
+
+const { pageTitle } = Astro.props
+
+const navLinks = [
+  { label: pageTitle.toLowerCase() === "home" ? "Home" : "Sandip", href: "/", pageTitle: "home" },
+  { label: "Projects", href: "/projects", pageTitle: "projects" },
+  { label: "Blog", href: "/blog", pageTitle: "blog" },
+  { label: "Work", href: "/work", pageTitle: "work" }
+]
+---
+
+<header>
+  <nav class="flex justify-between">
+    <NavLink 
+      link={navLinks[0]} 
+      isActive={pageTitle.toLowerCase() === navLinks[0].pageTitle.toLowerCase()}
+    />
+    <div class="flex gap-x-6 items-center">
+      {
+        navLinks.slice(1).map(link => (
+          <NavLink
+            link={link}
+            isActive={pageTitle.toLowerCase() === link.pageTitle.toLowerCase()}
+          />
+        ))
+      }
+      <ThemeToggle />
+    </div>
+  </nav>
+</header>

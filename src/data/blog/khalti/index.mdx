@@ -1,0 +1,321 @@
+---
+title: "Adding Khalti Payments to Your React App: A Developer's Guide"
+date: 2024-10-28
+oneLiner: "A step-by-step guide to integrating Khalti payments into your React application"
+tags: ["khalti", "react", "typescript", "payment-gateway", "ecommerce", "nepal"]
+contentType: "note"
+---
+
+Hey fellow developers! 👋 I recently tackled integrating Khalti payments into a React app, and I wanted to share my experience with you all. If you're building an e-commerce site in Nepal, you'll probably need to add Khalti as a payment option. Don't worry - it's not as complicated as it might seem!
+
+## Let's Get Started with Khalti
+
+First things first - you'll need a merchant account. Head over to [Khalti's test admin panel](https://test-admin.khalti.com/#/join/merchant) and sign up. This gives you access to their sandbox environment where you can test payments without using real money (your wallet will thank you!). After signing up, you'll get your public and secret keys - keep these handy!
+
+## Setting Up Our Project
+
+Let's start by installing our friend Axios - we'll need it for API calls:
+
+```bash
+pnpm install axios
+```
+
+Now, we need to set up our Khalti config. Create a new file called `khaltiConfig.ts` in your `src/config` folder:
+
+```typescript
+import axios from "axios";
+
+export const KHALTI_CONFIG = {
+  baseUrl: "https://a.khalti.com/api/v2", // Sandbox environment
+  secretKey: import.meta.env.VITE_KHALTI_LIVE_SECRET_KEY ?? "",
+} as const;
+
+export const khaltiClient = axios.create({
+  baseURL: KHALTI_CONFIG.baseUrl,
+  headers: {
+    Authorization: `Key ${KHALTI_CONFIG.secretKey}`,
+    "Content-Type": "application/json",
+  },
+});
+```
+
+Pretty straightforward, right? We're just setting up our base URL and secret key, and creating a pre-configured Axios instance. When you're ready to go live, just change that baseUrl to `https://khalti.com/api/v2`. Simple!
+
+## Creating a Custom Hook for Payments
+
+Now comes the fun part - let's create a custom hook to handle all our payment logic. I like to call this one `useKhalti.ts`. First, let's define our types:
+
+```typescript
+export interface PaymentRequest {
+  amount: number; // Amount in paisa (1 NPR = 100 paisa)
+  purchase_order_id: string; // Your unique order ID
+  purchase_order_name: string; // Product or order name
+  return_url: string; // Where to redirect after payment
+  website_url: string; // Your website URL
+  customer_info: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+}
+
+export interface PaymentInitiateResponse {
+  pidx: string; // Payment ID from Khalti
+  payment_url: string; // URL where user will make payment
+}
+
+export interface PaymentLookupResponse {
+  transaction_id: string;
+  status: "Completed" | "Pending" | "Failed";
+  total_amount: number;
+  purchase_order_id: string;
+  purchase_order_name: string;
+  mobile?: string;
+}
+
+type UseKhaltiOptions = {
+  onSuccess?: (response: PaymentLookupResponse) => void;
+  onError?: (error: Error) => void;
+  autoRedirect?: boolean;
+};
+```
+
+And here's our hook implementation:
+
+```typescript
+export function useKhalti({
+  onSuccess,
+  onError,
+  autoRedirect = true,
+}: UseKhaltiOptions = {}) {
+  const [pidx, setPidx] = useState<string | null>(null);
+  const [initiationError, setInitiationError] = useState<Error | null>(null);
+  const [statusError, setStatusError] = useState<Error | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const initiate = async (data: PaymentRequest) => {
+    setIsLoading(true);
+    setInitiationError(null);
+
+    try {
+      const response = await axios.post<PaymentInitiateResponse>(
+        `${KHALTI_CONFIG.baseUrl}/epayment/initiate/`,
+        data
+      );
+
+      const paymentResponse = response.data;
+      setPidx(paymentResponse.pidx);
+
+      if (autoRedirect) {
+        window.location.href = paymentResponse.payment_url;
+      }
+
+      return paymentResponse;
+    } catch (error) {
+      setInitiationError(error as Error);
+      onError?.(error as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkPaymentStatus = async () => {
+    if (!pidx) {
+      throw new Error("Payment ID not found");
+    }
+
+    setIsLoading(true);
+    setStatusError(null);
+
+    try {
+      const response = await axios.post<PaymentLookupResponse>(
+        `${KHALTI_CONFIG.baseUrl}/epayment/lookup/`,
+        { pidx }
+      );
+
+      const paymentStatus = response.data;
+      if (paymentStatus.status === "Completed") {
+        onSuccess?.(paymentStatus);
+      }
+
+      return paymentStatus;
+    } catch (error) {
+      setStatusError(error as Error);
+      onError?.(error as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    initiate,
+    checkPaymentStatus,
+    pidx,
+    initiationError,
+    statusError,
+    isLoading,
+  };
+}
+```
+
+This hook does all the heavy lifting for us - managing payment state, handling errors, and providing nice loading states. Plus, it'll automatically redirect to Khalti's payment page when needed!
+
+## Building the Payment Form
+
+Let's create a simple payment form using our shiny new hook:
+
+```tsx
+import { useState } from "react";
+import { useKhalti } from "@/hooks/useKhalti";
+
+const PaymentForm = ({ product }) => {
+  const { initiate, initiationError, isLoading } = useKhalti({
+    onSuccess: (response) => {
+      // Navigate to success page with payment details
+      navigate(`/success`, { state: { product, response } });
+    },
+    onError: (error) => {
+      console.error("Payment error:", error.message);
+    },
+  });
+
+  const handlePayment = () => {
+    if (product) {
+      const paymentRequest = {
+        amount: product.price * 100, // Convert NPR to paisa
+        purchase_order_id: `order-${product.id}`,
+        purchase_order_name: product.name,
+        customer_info: {
+          name: customerName,
+          email: customerEmail,
+          phone: customerPhone,
+        },
+        return_url: "http://localhost:3000/success",
+        website_url: "http://localhost:3000",
+      };
+      initiate(paymentRequest);
+    }
+  };
+
+  return (
+    <div>
+      {isLoading && <span>Processing payment...</span>}
+      {initiationError && <span>Error: {initiationError.message}</span>}
+      <button onClick={handlePayment} disabled={isLoading}>
+        Pay Now with Khalti
+      </button>
+    </div>
+  );
+};
+```
+
+## Handling the Success Page
+
+After a successful payment, Khalti sends the user back to your return URL with all the payment details. Here's how we handle that:
+
+```tsx
+import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+
+const SuccessPage = () => {
+  const [searchParams] = useSearchParams();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const purchaseOrderName = searchParams.get("purchase_order_name") || "";
+  const amount = searchParams.get("amount") || ""; // This will be in paisa
+  const purchaseOrderId = searchParams.get("purchase_order_id") || "";
+  const transactionId = searchParams.get("transaction_id") || "";
+  const mobile = searchParams.get("mobile") || "";
+  const status = searchParams.get("status") || "";
+
+  return (
+    <div>
+      <h1>Payment {status}</h1>
+      <div>
+        <p>Order: {purchaseOrderName}</p>
+        <p>Amount: NPR {Number(amount) / 100}</p> // Convert paisa back to NPR
+        <p>Transaction ID: {transactionId}</p>
+      </div>
+    </div>
+  );
+};
+```
+
+## Pro Tips for Implementation
+
+Here are some things I learned the hard way:
+
+1. **Always Handle Errors Gracefully**
+```typescript
+try {
+  await initiate(paymentRequest);
+} catch (error) {
+  setErrorMessage("Payment failed. Please try again.");
+  console.error("Payment error:", error);
+}
+```
+
+2. **Don't Forget the Paisa Conversion**
+```typescript
+const amount = productPrice * 100; // Always convert NPR to paisa!
+```
+
+3. **Keep Your Keys Safe**
+```bash
+# .env file
+VITE_KHALTI_LIVE_SECRET_KEY=your-secret-key-here
+VITE_KHALTI_TEST_SECRET_KEY=your-test-key-here
+```
+
+4. **Verify Payments on Your Backend**
+```typescript
+const verifyPayment = async (pidx: string) => {
+  const response = await axios.post("/api/verify-khalti-payment", { pidx });
+  return response.data.verified;
+};
+```
+
+## Testing Made Easy
+
+When testing, use these credentials in the sandbox environment:
+- Test Khalti IDs: 9800000000, 9800000001, 9800000002, 9800000003, 9800000004, 9800000005
+- Test MPIN: 1111
+- Test OTP: 987654
+
+## Common Gotchas to Watch Out For
+
+1. **The Paisa Trap**: Always remember Khalti wants amounts in paisa, not NPR. ₹100 = 10000 paisa!
+2. **Return URL Setup**: Make sure your return_url can handle all payment states properly.
+3. **Error Handling**: Network errors happen - handle them gracefully.
+4. **Environment Management**: Keep those test and production keys separate!
+
+## Running the Project Locally
+
+Since Khalti's sandbox environment only allows `localhost:3000` due to CORS restrictions, you'll need to run the project locally:
+
+1. Clone the repo:
+```bash
+git clone https://github.com/dev-sandip/khalti
+cd khalti
+pnpm install
+```
+
+2. Set up your `.env`:
+```bash
+VITE_KHALTI_TEST_SECRET_KEY=your-test-key-here
+```
+
+3. Fire it up:
+```bash
+pnpm dev
+```
+
+I've created a video demonstration showing the complete payment flow in action, which I'll attach to help you see everything working together.
+
+## Need More Help?
+
+Check out [Khalti's official documentation](https://docs.khalti.com/khalti-epayment) for the nitty-gritty details. The complete source code is available on my GitHub at [dev-sandip/khalti](https://github.com/dev-sandip/khalti) - feel free to use it as a reference!
+
+That's it! If you found this guide helpful, don't forget to star the repo. Happy coding! 🚀
+
+![Thank You](https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNThjZ3B1c2E2dDV5am5xdmR1YzZ0djVubmt6dDlub3Vka2puOWgwbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5xtDarmwsuR9sDRObyU/giphy.gif)

@@ -1,0 +1,13 @@
+---
+import BlogListLayout from "../../layouts/BlogListLayout.astro";
+import { getCollection } from "astro:content";
+import { getAllTags } from "../../utils/tags";
+
+const allBlogs = (await getCollection("blog")).sort((a, b) => {
+  return b.data.date.getTime() - a.data.date.getTime();
+});
+
+const { tags } = await getAllTags();
+---
+
+<BlogListLayout posts={allBlogs} allTags={tags} activeTag={null} />

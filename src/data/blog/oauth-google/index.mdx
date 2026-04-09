@@ -1,0 +1,193 @@
+---
+title: "Implementing Google OAuth2 in Node.js and Express"
+date: 2024-06-10
+oneLiner: "A comprehensive guide for implementing OAuth2 in Node.js and Express"
+tags: ["nodejs", "express", "oauth2", "google-api"]
+contentType: "note"
+---
+
+
+## Introduction
+
+This tutorial guides you through implementing Google OAuth2 authentication in a Node.js and Express application. We'll use the `googleapis` npm package to authenticate users with their Google accounts.
+
+## Prerequisites
+
+- Basic knowledge of Node.js and Express
+- Node.js installed on your machine
+- A Google Developers Console account
+
+## Step 1: Set Up Google OAuth2 Credentials
+
+1. Go to the [Google Developers Console](https://console.developers.google.com/).
+2. Create a new project or select an existing one.
+3. Enable the Google+ API for your project.
+4. Create OAuth2 credentials:
+   - Choose "OAuth client ID" as the credential type.
+   - Select "Web application" as the application type.
+   - Set the authorized redirect URI (e.g., `http://localhost:3000/auth/google/callback`).
+
+## Step 2: Install Required Packages
+
+```bash
+npm install express mongoose googleapis
+```
+
+## Step 3: Configure OAuth2 Client
+
+Create `config/oauth.js`:
+
+```javascript
+import { google } from "googleapis";
+
+const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    "postmessage"  // or your callback URL
+);
+
+export default oauth2Client;
+```
+
+## Step 4: Create User Models
+
+Create `models/user.js`:
+
+```javascript
+import { Schema, model } from "mongoose";
+
+const userSchema = new Schema({
+    name: { type: String, required: true, maxLength: 50 },
+    email: { 
+        type: String, 
+        required: true, 
+        unique: true,
+        validate: {
+            validator: (v) => /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v),
+            message: (props) => `${props.value} is not a valid email address!`,
+        },
+    },
+    image: { type: String },
+}, { timestamps: true });
+
+export default model("User", userSchema);
+```
+
+Create `models/user-credentials.js`:
+
+```javascript
+import { Schema, model } from "mongoose";
+
+const userCredentialsSchema = new Schema({
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    accessToken: { type: String, required: true },
+    refreshToken: { type: String, required: true },
+    expiresAt: { type: Date, required: true },
+    scope: { type: String },
+    idToken: { type: String },
+}, { timestamps: true });
+
+export default model("UserCredentials", userCredentialsSchema);
+```
+
+## Step 5: Implement Authentication Controller
+
+Create `controllers/authController.js`:
+
+```javascript
+import oauth2Client from "../config/oauth.js";
+import User from "../models/user.js";
+import UserCredentials from "../models/user-credentials.js";
+
+export const handleGoogleSignin = async (req, res) => {
+    try {
+        const { code } = req.body;
+        const { tokens } = await oauth2Client.getToken(code);
+
+        oauth2Client.setCredentials(tokens);
+
+        const userInfo = await fetch(
+            `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`
+        ).then(res => res.json());
+
+        const user = await User.findOneAndUpdate(
+            { email: userInfo.email },
+            { 
+                email: userInfo.email, 
+                name: userInfo.name, 
+                image: userInfo.picture 
+            },
+            { new: true, upsert: true }
+        );
+
+        await UserCredentials.findOneAndUpdate(
+            { userId: user._id },
+            {
+                accessToken: tokens.access_token,
+                refreshToken: tokens.refresh_token,
+                expiresAt: new Date(tokens.expiry_date),
+                scope: tokens.scope,
+                idToken: tokens.id_token,
+            },
+            { new: true, upsert: true }
+        );
+
+        // Here you would typically create and send a session token or JWT
+
+        res.status(200).json({
+            message: `Welcome back ${user.name}`,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                image: user.image
+            }
+        });
+    } catch (error) {
+        res.status(400).json({ message: "Authentication failed", error: error.message });
+    }
+};
+```
+
+## Step 6: Set Up Authentication Route
+
+Create `routes/authRoutes.js`:
+
+```javascript
+import express from "express";
+import { handleGoogleSignin } from "../controllers/authController.js";
+
+const router = express.Router();
+
+router.post("/google", handleGoogleSignin);
+
+export default router;
+```
+
+## Step 7: Integrate Routes in Main App
+
+In your main `app.js` or `server.js`:
+
+```javascript
+import express from "express";
+import authRoutes from "./routes/authRoutes.js";
+
+const app = express();
+
+app.use(express.json());
+app.use("/auth", authRoutes);
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+```
+
+Note : For testing the api it is recommended to use web app rather than postman .  You can refer to my github repo for the testing the api [here](https://github.com/dev-sandip/oauth-test).
+Give a star if you like it.
+## Conclusion
+
+You've now set up Google OAuth2 authentication in your Node.js and Express application. Users can sign in with their Google accounts, and their information will be stored in your database.
+
+Remember to handle token refreshing, implement proper error handling, and secure your application further based on your specific needs.
+
+Happy coding!
+![ThankYou](https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNThjZ3B1c2E2dDV5am5xdmR1YzZ0djVubmt6dDlub3Vka2puOWgwbCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5xtDarmwsuR9sDRObyU/giphy.gif)
