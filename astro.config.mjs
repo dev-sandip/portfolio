@@ -1,20 +1,22 @@
 // @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
 
-import tailwindcss from '@tailwindcss/vite';
-import mdx from '@astrojs/mdx';
+import tailwindcss from "@tailwindcss/vite";
+import mdx from "@astrojs/mdx";
 
-import sitemap from '@astrojs/sitemap';
+import sitemap from "@astrojs/sitemap";
 
-import cloudflare from '@astrojs/cloudflare';
+import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
   },
 
   site: "https://thesandip.dev",
   integrations: [mdx(), sitemap()],
-  adapter: cloudflare()
+  adapter: cloudflare({
+    imageService: { build: "compile", runtime: "cloudflare-binding" },
+  }),
 });
