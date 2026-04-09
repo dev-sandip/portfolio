@@ -3,7 +3,6 @@ title: "Handling Image Uploads with ImageKit in Node.js"
 date: 2024-07-15
 oneLiner: "A comprehensive guide to managing image uploads in a Node.js application using ImageKit"
 tags: ["imagekit", "nodejs", "file-uploads", "media-management"]
-contentType: "note"
 ---
 
 📸 Managing image uploads efficiently is crucial for any application that handles media files. In this blog post, we'll explore how to set up and use ImageKit, a robust media management solution, for handling image uploads in a Node.js application. We'll walk through the configuration and implementation of key functions like uploading and deleting images.
@@ -23,12 +22,12 @@ Next, you need to set up your configuration file to initialize ImageKit with you
 Create a configuration file (`config/imageKit.ts`) and add the following code:
 
 ```typescript
-import ImageKit from 'imagekit';
+import ImageKit from "imagekit";
 
 const imageKit = new ImageKit({
-  publicKey: process.env.IMAGE_KIT_PUBLIC_KEY || '',
-  privateKey: process.env.IMAGE_KIT_PRIVATE_KEY || '',
-  urlEndpoint: process.env.IMAGE_KIT_ENDPOINT || '',
+  publicKey: process.env.IMAGE_KIT_PUBLIC_KEY || "",
+  privateKey: process.env.IMAGE_KIT_PRIVATE_KEY || "",
+  urlEndpoint: process.env.IMAGE_KIT_ENDPOINT || "",
 });
 
 export default imageKit;
@@ -45,12 +44,12 @@ With ImageKit configured, we can now create functions to handle image uploads an
 Create a file (`services/imageService.ts`) and add the following code to handle image uploads:
 
 ```typescript
-import imageKit from '../config/imageKit';
+import imageKit from "../config/imageKit";
 
 const uploadImage = (
   file: string | Buffer,
   fileName: string,
-  folder: string
+  folder: string,
 ): Promise<any> => {
   return new Promise((resolve, reject) => {
     imageKit.upload(
@@ -65,7 +64,7 @@ const uploadImage = (
         } else {
           resolve(result);
         }
-      }
+      },
     );
   });
 };
@@ -102,18 +101,18 @@ This function takes a `fileId` parameter, which is the unique identifier for the
 To use these functions in your application, simply import them and call them as needed. Here's an example of how to use the `uploadImage` function:
 
 ```typescript
-import { Request, Response } from 'express';
-import { uploadImage } from './services/imageService';
+import { Request, Response } from "express";
+import { uploadImage } from "./services/imageService";
 
 const upload = async (req: Request, res: Response) => {
   try {
     const file = req.files?.image; // assuming you're using a middleware like multer
     if (!file) {
-      throw new Error('No file uploaded');
+      throw new Error("No file uploaded");
     }
 
     const fileName = file.name;
-    const folder = '/uploads';
+    const folder = "/uploads";
 
     const result = await uploadImage(file.data, fileName, folder);
     res.status(200).json({ success: true, data: result });

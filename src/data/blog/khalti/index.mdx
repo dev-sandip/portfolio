@@ -3,7 +3,6 @@ title: "Adding Khalti Payments to Your React App: A Developer's Guide"
 date: 2024-10-28
 oneLiner: "A step-by-step guide to integrating Khalti payments into your React application"
 tags: ["khalti", "react", "typescript", "payment-gateway", "ecommerce", "nepal"]
-contentType: "note"
 ---
 
 Hey fellow developers! 👋 I recently tackled integrating Khalti payments into a React app, and I wanted to share my experience with you all. If you're building an e-commerce site in Nepal, you'll probably need to add Khalti as a payment option. Don't worry - it's not as complicated as it might seem!
@@ -100,7 +99,7 @@ export function useKhalti({
     try {
       const response = await axios.post<PaymentInitiateResponse>(
         `${KHALTI_CONFIG.baseUrl}/epayment/initiate/`,
-        data
+        data,
       );
 
       const paymentResponse = response.data;
@@ -130,7 +129,7 @@ export function useKhalti({
     try {
       const response = await axios.post<PaymentLookupResponse>(
         `${KHALTI_CONFIG.baseUrl}/epayment/lookup/`,
-        { pidx }
+        { pidx },
       );
 
       const paymentStatus = response.data;
@@ -246,6 +245,7 @@ const SuccessPage = () => {
 Here are some things I learned the hard way:
 
 1. **Always Handle Errors Gracefully**
+
 ```typescript
 try {
   await initiate(paymentRequest);
@@ -256,11 +256,13 @@ try {
 ```
 
 2. **Don't Forget the Paisa Conversion**
+
 ```typescript
 const amount = productPrice * 100; // Always convert NPR to paisa!
 ```
 
 3. **Keep Your Keys Safe**
+
 ```bash
 # .env file
 VITE_KHALTI_LIVE_SECRET_KEY=your-secret-key-here
@@ -268,6 +270,7 @@ VITE_KHALTI_TEST_SECRET_KEY=your-test-key-here
 ```
 
 4. **Verify Payments on Your Backend**
+
 ```typescript
 const verifyPayment = async (pidx: string) => {
   const response = await axios.post("/api/verify-khalti-payment", { pidx });
@@ -278,6 +281,7 @@ const verifyPayment = async (pidx: string) => {
 ## Testing Made Easy
 
 When testing, use these credentials in the sandbox environment:
+
 - Test Khalti IDs: 9800000000, 9800000001, 9800000002, 9800000003, 9800000004, 9800000005
 - Test MPIN: 1111
 - Test OTP: 987654
@@ -294,6 +298,7 @@ When testing, use these credentials in the sandbox environment:
 Since Khalti's sandbox environment only allows `localhost:3000` due to CORS restrictions, you'll need to run the project locally:
 
 1. Clone the repo:
+
 ```bash
 git clone https://github.com/dev-sandip/khalti
 cd khalti
@@ -301,11 +306,13 @@ pnpm install
 ```
 
 2. Set up your `.env`:
+
 ```bash
 VITE_KHALTI_TEST_SECRET_KEY=your-test-key-here
 ```
 
 3. Fire it up:
+
 ```bash
 pnpm dev
 ```

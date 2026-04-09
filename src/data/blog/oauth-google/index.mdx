@@ -3,9 +3,7 @@ title: "Implementing Google OAuth2 in Node.js and Express"
 date: 2024-06-10
 oneLiner: "A comprehensive guide for implementing OAuth2 in Node.js and Express"
 tags: ["nodejs", "express", "oauth2", "google-api"]
-contentType: "note"
 ---
-
 
 ## Introduction
 
@@ -41,9 +39,9 @@ Create `config/oauth.js`:
 import { google } from "googleapis";
 
 const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    "postmessage"  // or your callback URL
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  "postmessage", // or your callback URL
 );
 
 export default oauth2Client;
@@ -56,19 +54,22 @@ Create `models/user.js`:
 ```javascript
 import { Schema, model } from "mongoose";
 
-const userSchema = new Schema({
+const userSchema = new Schema(
+  {
     name: { type: String, required: true, maxLength: 50 },
-    email: { 
-        type: String, 
-        required: true, 
-        unique: true,
-        validate: {
-            validator: (v) => /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v),
-            message: (props) => `${props.value} is not a valid email address!`,
-        },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      validate: {
+        validator: (v) => /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v),
+        message: (props) => `${props.value} is not a valid email address!`,
+      },
     },
     image: { type: String },
-}, { timestamps: true });
+  },
+  { timestamps: true },
+);
 
 export default model("User", userSchema);
 ```
@@ -78,14 +79,17 @@ Create `models/user-credentials.js`:
 ```javascript
 import { Schema, model } from "mongoose";
 
-const userCredentialsSchema = new Schema({
+const userCredentialsSchema = new Schema(
+  {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     accessToken: { type: String, required: true },
     refreshToken: { type: String, required: true },
     expiresAt: { type: Date, required: true },
     scope: { type: String },
     idToken: { type: String },
-}, { timestamps: true });
+  },
+  { timestamps: true },
+);
 
 export default model("UserCredentials", userCredentialsSchema);
 ```
@@ -100,52 +104,54 @@ import User from "../models/user.js";
 import UserCredentials from "../models/user-credentials.js";
 
 export const handleGoogleSignin = async (req, res) => {
-    try {
-        const { code } = req.body;
-        const { tokens } = await oauth2Client.getToken(code);
+  try {
+    const { code } = req.body;
+    const { tokens } = await oauth2Client.getToken(code);
 
-        oauth2Client.setCredentials(tokens);
+    oauth2Client.setCredentials(tokens);
 
-        const userInfo = await fetch(
-            `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`
-        ).then(res => res.json());
+    const userInfo = await fetch(
+      `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`,
+    ).then((res) => res.json());
 
-        const user = await User.findOneAndUpdate(
-            { email: userInfo.email },
-            { 
-                email: userInfo.email, 
-                name: userInfo.name, 
-                image: userInfo.picture 
-            },
-            { new: true, upsert: true }
-        );
+    const user = await User.findOneAndUpdate(
+      { email: userInfo.email },
+      {
+        email: userInfo.email,
+        name: userInfo.name,
+        image: userInfo.picture,
+      },
+      { new: true, upsert: true },
+    );
 
-        await UserCredentials.findOneAndUpdate(
-            { userId: user._id },
-            {
-                accessToken: tokens.access_token,
-                refreshToken: tokens.refresh_token,
-                expiresAt: new Date(tokens.expiry_date),
-                scope: tokens.scope,
-                idToken: tokens.id_token,
-            },
-            { new: true, upsert: true }
-        );
+    await UserCredentials.findOneAndUpdate(
+      { userId: user._id },
+      {
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        expiresAt: new Date(tokens.expiry_date),
+        scope: tokens.scope,
+        idToken: tokens.id_token,
+      },
+      { new: true, upsert: true },
+    );
 
-        // Here you would typically create and send a session token or JWT
+    // Here you would typically create and send a session token or JWT
 
-        res.status(200).json({
-            message: `Welcome back ${user.name}`,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                image: user.image
-            }
-        });
-    } catch (error) {
-        res.status(400).json({ message: "Authentication failed", error: error.message });
-    }
+    res.status(200).json({
+      message: `Welcome back ${user.name}`,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      },
+    });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Authentication failed", error: error.message });
+  }
 };
 ```
 
@@ -181,8 +187,9 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 ```
 
-Note : For testing the api it is recommended to use web app rather than postman .  You can refer to my github repo for the testing the api [here](https://github.com/dev-sandip/oauth-test).
+Note : For testing the api it is recommended to use web app rather than postman . You can refer to my github repo for the testing the api [here](https://github.com/dev-sandip/oauth-test).
 Give a star if you like it.
+
 ## Conclusion
 
 You've now set up Google OAuth2 authentication in your Node.js and Express application. Users can sign in with their Google accounts, and their information will be stored in your database.

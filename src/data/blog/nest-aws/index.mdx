@@ -3,7 +3,6 @@ title: "Implementing Secure AWS S3 File Uploads in NestJS with Presigned URLs"
 date: 2024-09-14
 oneLiner: "A comprehensive guide to implementing secure file uploads using AWS S3 presigned URLs in NestJS"
 tags: ["nestjs", "aws-s3", "file-uploads", "presigned-urls"]
-contentType: "note"
 ---
 
 File uploads are a critical feature in modern web applications. When building scalable applications with NestJS, integrating AWS S3 for file storage provides reliability, scalability, and cost-effectiveness. In this comprehensive guide, we'll implement a secure file upload system using AWS S3 presigned URLs with NestJS.
@@ -59,17 +58,17 @@ NODE_ENV=development
 The `ObjectStorage` class handles all AWS S3 interactions:
 
 ```typescript
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 import {
   DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { GetSignedUrlMetadata } from '../dto/request/signed-url.dto';
-import { User } from 'src/modules/user/entity/user.entity';
-import { MIME_TYPES } from 'src/common/constants/mime-types';
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { GetSignedUrlMetadata } from "../dto/request/signed-url.dto";
+import { User } from "src/modules/user/entity/user.entity";
+import { MIME_TYPES } from "src/common/constants/mime-types";
 
 @Injectable()
 export class ObjectStorage {
@@ -84,11 +83,11 @@ export class ObjectStorage {
       region: process.env.AWS_REGION,
       endpoint: process.env.AWS_ENDPOINT_URL_S3,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? '',
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID ?? "",
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? "",
       },
     });
-    this._bucketName = 'saypatri';
+    this._bucketName = "saypatri";
     this._expiresIn = 60 * 10; // 10 minutes
     this._getReadSignedUrlExpiresIn = 60 * 60; // 1 hour
     this._supportedMimeTypes = Object.values(MIME_TYPES).flatMap((mime) =>
@@ -97,8 +96,8 @@ export class ObjectStorage {
   }
 
   private _getKey(user: User, ...keys: string[]) {
-    const key = `${user.id}/${keys.join('/')}`;
-    if (process.env.NODE_ENV === 'development') {
+    const key = `${user.id}/${keys.join("/")}`;
+    if (process.env.NODE_ENV === "development") {
       return `saypatri/${key}`;
     }
     return key;
@@ -120,11 +119,11 @@ export class ObjectStorage {
   ) {
     if (!this._validateMimeType(metadata.contentType)) {
       throw new Error(
-        'Unsupported file type, only images, pdf, audio and text files are supported',
+        "Unsupported file type, only images, pdf, audio and text files are supported",
       );
     }
     if (!this._validateFileSize(metadata.fileSize)) {
-      throw new Error('File size exceeds the limit of 20mb');
+      throw new Error("File size exceeds the limit of 20mb");
     }
 
     const computedKey = this._getKey(user, scope, key);
@@ -149,13 +148,13 @@ export class ObjectStorage {
         expiresIn: this._expiresIn,
       };
     } catch {
-      throw new Error('Failed to get signed url');
+      throw new Error("Failed to get signed url");
     }
   }
 
   async deleteObject(user: User, key: string) {
-    if (key.split('/')[1] !== user.id) {
-      throw new Error('User is not authorized to delete this object');
+    if (key.split("/")[1] !== user.id) {
+      throw new Error("User is not authorized to delete this object");
     }
     try {
       await this._client.send(
@@ -165,7 +164,7 @@ export class ObjectStorage {
         }),
       );
     } catch {
-      throw new Error('Failed to delete object');
+      throw new Error("Failed to delete object");
     }
   }
 
@@ -187,10 +186,10 @@ export class ObjectStorage {
 The service layer orchestrates the file upload operations:
 
 ```typescript
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ObjectStorage } from './lib/object-storage';
-import { DeleteObjectDto, SignedUrlDto } from './dto/request/signed-url.dto';
-import { User } from '../user/entity/user.entity';
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { ObjectStorage } from "./lib/object-storage";
+import { DeleteObjectDto, SignedUrlDto } from "./dto/request/signed-url.dto";
+import { User } from "../user/entity/user.entity";
 
 @Injectable()
 export class UploadService {
@@ -200,7 +199,7 @@ export class UploadService {
     try {
       const signedUrl = await this._objectStorage.getSignedUrl(
         user,
-        'proposals',
+        "proposals",
         key,
         payload.metadata,
       );
@@ -233,28 +232,28 @@ import {
   Post,
   Query,
   UseGuards,
-} from '@nestjs/common';
-import { DeleteObjectDto, SignedUrlDto } from './dto/request/signed-url.dto';
-import { UploadService } from './upload.service';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/config/guards/jwt-auth.guard';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { User } from '../user/entity/user.entity';
+} from "@nestjs/common";
+import { DeleteObjectDto, SignedUrlDto } from "./dto/request/signed-url.dto";
+import { UploadService } from "./upload.service";
+import { ApiBearerAuth, ApiOperation } from "@nestjs/swagger";
+import { JwtAuthGuard } from "src/config/guards/jwt-auth.guard";
+import { CurrentUser } from "src/common/decorators/current-user.decorator";
+import { User } from "../user/entity/user.entity";
 
-@Controller('upload')
+@Controller("upload")
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 export class UploadController {
   constructor(private readonly _objectStorageService: UploadService) {}
 
-  @Post('signed-url')
-  @ApiOperation({ summary: 'Generate A Presigned Url for file Upload!' })
+  @Post("signed-url")
+  @ApiOperation({ summary: "Generate A Presigned Url for file Upload!" })
   async getSignedUrl(@Body() body: SignedUrlDto, @CurrentUser() user: User) {
     console.log(body);
     return this._objectStorageService.getSignedUrl(user, body);
   }
 
-  @Delete('/')
+  @Delete("/")
   async deleteObject(
     @Query() query: DeleteObjectDto,
     @CurrentUser() user: User,
@@ -269,10 +268,10 @@ export class UploadController {
 Finally, wire everything together in the module:
 
 ```typescript
-import { Module } from '@nestjs/common';
-import { UploadService } from './upload.service';
-import { UploadController } from './upload.controller';
-import { ObjectStorage } from './lib/object-storage';
+import { Module } from "@nestjs/common";
+import { UploadService } from "./upload.service";
+import { UploadController } from "./upload.controller";
+import { ObjectStorage } from "./lib/object-storage";
 
 @Module({
   imports: [],
@@ -285,7 +284,9 @@ export class UploadModule {}
 ## Key Security Features
 
 ### 1. User-Based File Organization
+
 Files are organized by user ID, ensuring proper access control:
+
 ```typescript
 private _getKey(user: User, ...keys: string[]) {
   const key = `${user.id}/${keys.join('/')}`;
@@ -298,12 +299,15 @@ private _getKey(user: User, ...keys: string[]) {
 ```
 
 ### 1. User-Based File Organization
+
 Multiple layers of validation protect against malicious uploads:
+
 - **File Size Validation**: Maximum 20MB per file
 - **MIME Type Validation**: Only allowed file types accepted
 - **User Authorization**: Users can only delete their own files
 
 ### 3. Temporary URLs
+
 Presigned URLs expire after 10 minutes, limiting the window for potential abuse.
 
 ## Frontend Integration
@@ -312,54 +316,60 @@ Here's how you can use the presigned URL on the frontend:
 
 ```javascript
 // 1. Request a presigned URL
-const response = await fetch('/upload/signed-url', {
-  method: 'POST',
+const response = await fetch("/upload/signed-url", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${authToken}`
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${authToken}`,
   },
   body: JSON.stringify({
-    key: 'my-file.pdf',
+    key: "my-file.pdf",
     metadata: {
-      contentType: 'application/pdf',
-      fileSize: file.size
-    }
-  })
+      contentType: "application/pdf",
+      fileSize: file.size,
+    },
+  }),
 });
 
 const { signedUrl, key } = await response.json();
 
 // 2. Upload directly to S3
 await fetch(signedUrl, {
-  method: 'PUT',
+  method: "PUT",
   body: file,
   headers: {
-    'Content-Type': file.type,
-  }
+    "Content-Type": file.type,
+  },
 });
 ```
 
 ## Best Practices and Considerations
 
 ### 1. Error Handling
+
 Always implement comprehensive error handling for AWS operations:
+
 - Network failures
 - Permission issues
 - Invalid credentials
 - Bucket access problems
 
 ### 2. Monitoring and Logging
+
 Consider implementing:
+
 - Upload success/failure tracking
 - File access logging
 - Storage usage monitoring
 
 ### 3. Performance Optimization
+
 - Implement file compression for images
 - Use CloudFront CDN for file delivery
 - Consider implementing multipart uploads for large files
 
 ### 4. Security Enhancements
+
 - Implement virus scanning for uploaded files
 - Add rate limiting to prevent abuse
 - Use IAM roles with minimal required permissions
@@ -371,12 +381,12 @@ Create different configurations for development and production:
 ```typescript
 // config/aws.config.ts
 export const getAWSConfig = () => ({
-  region: process.env.AWS_REGION || 'us-east-1',
+  region: process.env.AWS_REGION || "us-east-1",
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
-  bucket: process.env.AWS_S3_BUCKET || 'default-bucket',
+  bucket: process.env.AWS_S3_BUCKET || "default-bucket",
 });
 ```
 
@@ -395,6 +405,7 @@ Test your upload functionality with various scenarios:
 This implementation provides a robust, secure, and scalable file upload solution using AWS S3 and NestJS. The use of presigned URLs ensures optimal performance while maintaining security through proper validation and user authentication.
 
 Key benefits of this approach include:
+
 - **Scalability**: Direct uploads to S3 reduce server load
 - **Security**: User-based file organization and validation
 - **Performance**: No server bandwidth consumption for uploads
@@ -406,4 +417,4 @@ Remember to monitor your AWS costs and implement appropriate lifecycle policies 
 
 ---
 
-*Ready to implement this in your NestJS application? Start with setting up your AWS credentials and gradually build out each component following this guide.*
+_Ready to implement this in your NestJS application? Start with setting up your AWS credentials and gradually build out each component following this guide._
