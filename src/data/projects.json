@@ -1,9 +1,37 @@
 [
   {
-    "id": 1,
+    "id": 3,
+    "name": "File Storage App",
+    "date": "2025",
+    "skills": [
+      "Next.js",
+      "TypeScript",
+      "BetterAuth",
+      "Tailwind CSS",
+      "Shadcn UI",
+      "DrizzleKit",
+      "AWS S3"
+    ],
+    "oneLiner": "Manage files and folders with roles, analytics, and admin controls",
+    "description": "- Built a full-featured file storage system using Next.js and TypeScript\n- Implemented authentication and role-based access with BetterAuth\n- Designed scalable backend with DrizzleKit ORM and AWS S3 for file storage\n- Added analytics, admin dashboards, and user role management\n- Developed clean UI using Tailwind CSS and Shadcn UI components",
+    "cover": "/src/assets/projects/files.png",
+    "links": {
+      "live": "https://files.thesandip.dev",
+      "github": "https://github.com/dev-sandip/files"
+    }
+  },
+  {
+    "id": 2,
     "name": "aces-website",
     "date": "2025",
-    "skills": ["Next.js", "TypeScript", "ClerkJS", "Tailwind CSS", "Shadcn UI", "ImageKit"],
+    "skills": [
+      "Next.js",
+      "TypeScript",
+      "ClerkJS",
+      "Tailwind CSS",
+      "Shadcn UI",
+      "ImageKit"
+    ],
     "oneLiner": "Official website for ACES with event and member management",
     "description": "- Developed backend infrastructure for ACES official website\n- Managed events, member profiles, and resource sharing\n- Focused on scalability and clean API design",
     "cover": "/src/assets/projects/aces.png",
@@ -13,7 +41,7 @@
     }
   },
   {
-    "id": 2,
+    "id": 1,
     "name": "student-tiffin",
     "date": "2025",
     "skills": ["Node.js", "Express.js", "MongoDB", "Stripe"],
