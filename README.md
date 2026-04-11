@@ -1,9 +1,19 @@
 # Portfolio
 
-This is my portfolio website built with Astro.
+Personal portfolio website for Sandip Sapkota, built with Astro.
 
-### Environment Variables
+## Features
 
-Refer `.env.example` for required environment variables
+- Personal portfolio built with Astro
+- Blog, projects, and work sections
 
-> GITHUB_TOKEN - Required scope: read:user (read-only access to profile data)
+## Run
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## Environment
+
+Copy `.env.example` and set the required environment variables.
