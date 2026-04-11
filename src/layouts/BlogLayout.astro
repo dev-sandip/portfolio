@@ -7,9 +7,38 @@ import MobileToc from "../components/MobileToc.astro";
 import CopyEmail from "../components/CopyEmail.astro";
 
 const { frontmatter, headings = [] } = Astro.props;
+const canonicalPath = `/blog/${Astro.params.slug ?? ""}`;
+const description = frontmatter.oneLiner;
 ---
 
-<BaseLayout pageTitle="Blog" tabTitle={frontmatter.title} wideLayout={true}>
+<BaseLayout
+  pageTitle="Blog"
+  tabTitle={`${frontmatter.title} | Sandip Sapkota`}
+  description={description}
+  canonicalPath={canonicalPath}
+  wideLayout={true}
+  ogType="article"
+  publishedTime={frontmatter.date}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": frontmatter.contentType === "note" ? "Article" : "BlogPosting",
+    headline: frontmatter.title,
+    description,
+    datePublished: frontmatter.date,
+    author: {
+      "@type": "Person",
+      name: "Sandip Sapkota",
+      url: "https://thesandip.dev/",
+    },
+    publisher: {
+      "@type": "Person",
+      name: "Sandip Sapkota",
+      url: "https://thesandip.dev/",
+    },
+    mainEntityOfPage: new URL(canonicalPath, Astro.site).href,
+    keywords: frontmatter.tags,
+  }}
+>
   <div class="grid grid-cols-1 lg:grid-cols-[250px_1fr_250px] gap-8 grow">
     <aside class="hidden lg:block">
       {

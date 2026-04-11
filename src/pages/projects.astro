@@ -6,9 +6,22 @@ import { getCollection } from "astro:content"
 
 const pageTitle = "Projects"
 const projects = (await getCollection("projects")).reverse()
+const description = "Selected software projects by Sandip Sapkota, covering backend systems, full-stack applications, and practical engineering work."
 ---
 
-<BaseLayout pageTitle={pageTitle} wideLayout={true}>
+<BaseLayout
+	pageTitle={pageTitle}
+	description={description}
+	canonicalPath="/projects"
+	wideLayout={true}
+	jsonLd={{
+		"@context": "https://schema.org",
+		"@type": "CollectionPage",
+		name: "Projects",
+		url: "https://thesandip.dev/projects",
+		description,
+	}}
+>
   <div class="grid grid-cols-1 lg:grid-cols-[250px_1fr_250px] gap-8 grow">
     <aside class="hidden lg:block">
       <nav class="sticky top-4">

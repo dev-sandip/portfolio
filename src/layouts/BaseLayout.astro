@@ -4,7 +4,48 @@ import Header from "../components/Header.astro"
 import Footer from "../components/Footer.astro"
 import { ClientRouter } from "astro:transitions"
 
-const { pageTitle, wideLayout = false } = Astro.props
+interface JsonLd {
+	[key: string]: unknown
+}
+
+interface Props {
+	pageTitle: string
+	tabTitle?: string
+	description?: string
+	canonicalPath?: string
+	wideLayout?: boolean
+	noindex?: boolean
+	ogType?: "website" | "article"
+	ogImage?: string
+	keywords?: string[]
+	jsonLd?: JsonLd | JsonLd[]
+	publishedTime?: string | Date
+	modifiedTime?: string | Date
+}
+
+const {
+	pageTitle,
+	tabTitle,
+	description = "Portfolio of Sandip Sapkota, a backend developer sharing projects, work experience, and technical writing.",
+	canonicalPath = Astro.url.pathname,
+	wideLayout = false,
+	noindex = false,
+	ogType = "website",
+	ogImage,
+	keywords = [],
+	jsonLd,
+	publishedTime,
+	modifiedTime,
+} = Astro.props as Props
+
+const siteName = "Sandip Sapkota"
+const title = tabTitle ?? (pageTitle === "Home" ? siteName : `${pageTitle} | ${siteName}`)
+const canonicalUrl = new URL(canonicalPath, Astro.site)
+const resolvedOgImage = ogImage ? new URL(ogImage, Astro.site).href : undefined
+const robots = noindex ? "noindex, nofollow" : "index, follow"
+const jsonLdItems = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []
+const publishedIso = publishedTime ? new Date(publishedTime).toISOString() : undefined
+const modifiedIso = modifiedTime ? new Date(modifiedTime).toISOString() : undefined
 ---
 <html lang="en">
 	<head>
@@ -12,9 +53,32 @@ const { pageTitle, wideLayout = false } = Astro.props
 		<link rel="icon" type="image/svg+xml" href="/favicon.ico" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>{`Sandip's ${pageTitle}`}</title>
+		<meta name="author" content={siteName} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="robots" content={robots} />
+		{keywords.length > 0 && <meta name="keywords" content={keywords.join(", ")} />}
+		<link rel="canonical" href={canonicalUrl} />
 		<link rel="sitemap" href="/sitemap-index.xml" />
 		<link rel="alternate" type="application/rss+xml" title="Sandip's Blog" href={new URL("rss.xml", Astro.site)} />
+		<meta property="og:site_name" content={siteName} />
+		<meta property="og:locale" content="en_US" />
+		<meta property="og:type" content={ogType} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonicalUrl} />
+		{resolvedOgImage && <meta property="og:image" content={resolvedOgImage} />}
+		<meta name="twitter:card" content={resolvedOgImage ? "summary_large_image" : "summary"} />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		{resolvedOgImage && <meta name="twitter:image" content={resolvedOgImage} />}
+		{publishedIso && <meta property="article:published_time" content={publishedIso} />}
+		{modifiedIso && <meta property="article:modified_time" content={modifiedIso} />}
+		{
+			jsonLdItems.map((item) => (
+				<script type="application/ld+json" set:html={JSON.stringify(item)} />
+			))
+		}
 		<script is:inline>
 			if (localStorage.getItem('theme') !== 'light') {
 				document.documentElement.classList.add('dark');

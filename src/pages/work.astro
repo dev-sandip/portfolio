@@ -4,8 +4,20 @@ import WorkTimeline from "../components/WorkTimeline.astro"
 import BaseLayout from "../layouts/BaseLayout.astro"
 
 const pageTitle = 'Work'
+const description = "Professional work history of Sandip Sapkota, including backend development experience and a timeline of roles."
 ---
-<BaseLayout pageTitle={pageTitle}>
+<BaseLayout
+	pageTitle={pageTitle}
+	description={description}
+	canonicalPath="/work"
+	jsonLd={{
+		"@context": "https://schema.org",
+		"@type": "ProfilePage",
+		name: "Work Experience",
+		url: "https://thesandip.dev/work",
+		description,
+	}}
+>
   <SectionLayout title={pageTitle}>
     <p>Here's a timeline of my professional work history. Check out my <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" class="link">resume</a> for a detailed version.</p>
     <WorkTimeline />

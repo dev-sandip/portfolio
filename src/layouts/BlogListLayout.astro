@@ -3,6 +3,7 @@ import BaseLayout from "./BaseLayout.astro";
 import BlogCard from "../components/BlogCard.astro";
 import TagSidebar from "../components/TagSidebar.astro";
 import MobileTagFilter from "../components/MobileTagFilter.astro";
+import { tagToSlug } from "../utils/tags";
 
 interface Props {
   posts: Array<{ id: string; data: { title: string; date: Date; oneLiner: string; tags: string[] } }>;
@@ -12,9 +13,25 @@ interface Props {
 
 const { posts, allTags, activeTag } = Astro.props;
 const pageTitle = activeTag ? `Tag: ${activeTag}` : "Blog";
+const description = activeTag
+  ? `Posts and notes tagged with ${activeTag} by Sandip Sapkota.`
+  : "Technical blog posts and notes by Sandip Sapkota about backend engineering, tooling, and software development.";
+const canonicalPath = activeTag ? `/blog/tags/${tagToSlug(activeTag)}` : "/blog";
 ---
 
-<BaseLayout pageTitle="Blog" wideLayout={true}>
+<BaseLayout
+  pageTitle={pageTitle}
+  description={description}
+  canonicalPath={canonicalPath}
+  wideLayout={true}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: pageTitle,
+    url: new URL(canonicalPath, Astro.site).href,
+    description,
+  }}
+>
   <div class="grid grid-cols-1 lg:grid-cols-[250px_1fr_250px] gap-8 grow">
     <TagSidebar tags={allTags} activeTag={activeTag} />
 

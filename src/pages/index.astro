@@ -1,9 +1,37 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro"
 import About from "../components/About.astro"
+
+const description = "Portfolio of Sandip Sapkota, a backend developer focused on scalable systems, practical projects, and technical writing."
 ---
 
-<BaseLayout pageTitle="Home">
+<BaseLayout
+	pageTitle="Home"
+	description={description}
+	canonicalPath="/"
+	jsonLd={[
+		{
+			"@context": "https://schema.org",
+			"@type": "WebSite",
+			name: "Sandip Sapkota",
+			url: "https://thesandip.dev/",
+			description,
+		},
+		{
+			"@context": "https://schema.org",
+			"@type": "Person",
+			name: "Sandip Sapkota",
+			url: "https://thesandip.dev/",
+			jobTitle: "Backend Developer",
+			description,
+			sameAs: [
+				"https://github.com/dev-sandip",
+				"https://x.com/tweets_sandip",
+				"https://www.linkedin.com/in/sandip-sapkota/",
+			],
+		},
+	]}
+>
 	<div class="flex flex-col gap-y-8 grow">
 		<About />
 	</div>
