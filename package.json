@@ -19,11 +19,12 @@
     "marked": "^18.0.0",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.2.2",
-    "wrangler": "^4.81.0"
+    "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
     "@astrojs/cloudflare": "^13.1.8",
-    "@tailwindcss/typography": "^0.5.19"
+    "@tailwindcss/typography": "^0.5.19",
+    "miniflare": "^4.20260515.0",
+    "wrangler": "^4.92.0"
   }
 }
