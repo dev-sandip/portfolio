@@ -1,4 +1,5 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
+import { z } from "astro/zod";
 import { file, glob } from "astro/loaders";
 import { githubContributionsLoader } from "./loaders/github-contributions-loader";
 
@@ -13,9 +14,9 @@ const blog = defineCollection({
     oneLiner: z.string(),
     tags: z.array(z.string()),
     contentType: z.enum(['post', 'note']).default('post'),
-    link: z.string().url().optional(),
+    link: z.url().optional(),
     author: z.string().optional(),
-    authorLink: z.string().url().optional(),
+    authorLink: z.url().optional(),
   })
 })
 
