@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://unpkg.com/@sveltia/cms/schema/sveltia-cms.json
+
+backend:
+  name: github
+  repo: dev-sandip/portfolio
+  branch: main
+  auth_methods: [token]
+  base_url: https://thesandip.dev
+
+logo:
+  src: https://thesandip.dev/favicon.ico
+
+app_title: Sandip's Portfolio CMS
+
+media_folder: "src/data/blog/assets"
+public_folder: "/src/data/blog/assets"
+
+collections:
+  - name: blog
+    label: "Blog"
+    label_singular: "Blog Post"
+    identifier_field: title
+    folder: src/data/blog
+    media_folder: assets
+    public_folder: ./assets
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Date, name: date, widget: datetime, type: date }
+      - {
+          label: One Liner,
+          name: oneLiner,
+          widget: string,
+          required: false,
+          hint: "A short summary of the blog post.",
+        }
+      - {
+          name: tags,
+          label: Tags,
+          widget: list,
+          required: true,
+          hint: "Add relevant tags for the blog post.",
+          field: { label: Tag, name: tag, widget: string },
+        }
+      - {
+          name: contentType,
+          label: Content Type,
+          widget: select,
+          options: ["post", "note"],
+          default: "post",
+          required: true,
+          hint: "Select the content type for the blog post.",
+        }
+      - {
+          name: link,
+          label: "External Link",
+          widget: string,
+          required: false,
+          hint: "Add an external link for the blog post.",
+        }
+      - {
+          name: author,
+          label: Author,
+          widget: string,
+          required: false,
+          hint: "Add the author's name for the blog post.",}
+
+      - {
+          name: authorLink,
+          label: "Author Link",
+          widget: string,
+          required: false,
+          hint: "Add an external link for the author.",
+        }
+      - { label: Content, name: body, widget: markdown }
