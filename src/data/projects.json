@@ -1,4 +1,27 @@
 [
+
+{
+  "id": 4,
+  "name": "InboXo",
+  "date": "2026",
+  "skills": [
+    "Plasmo",
+    "React",
+    "TypeScript",
+    "Tailwind CSS",
+    "Chrome Extension",
+    "mail.tm API"
+  ],
+  "oneLiner": "A disposable email inbox that lives in your browser toolbar",
+  "description": "- Built a browser extension using Plasmo, React, and TypeScript for instant disposable email management\n- Implemented live inbox polling and background alarms to track unread messages on the toolbar badge\n- Designed dual reading modes featuring a compact popup reader and a full-page two-pane inbox\n- Ensured secure email rendering by isolating message bodies inside a sandboxed iframe with scripts disabled\n- Integrated mail.tm API for automated mailbox provisioning, custom attachments, and session persistence",
+  "cover": "/src/assets/projects/inboxo.png",
+  "links": {
+    "live": "https://github.com/dev-sandip/inboxo",
+    "github": "https://github.com/dev-sandip/inboxo"
+  }
+},
+
+
   {
     "id": 3,
     "name": "File Storage App",
