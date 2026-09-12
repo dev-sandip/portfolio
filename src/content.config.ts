@@ -24,7 +24,7 @@ const works = defineCollection({
   loader: file("src/data/works.json"),
   schema: ({ image }) => z.object({
     company: z.string(),
-    companyLink: z.string().url(),
+    companyLink: z.url(),
     avatar: image(),
     location: z.string(),
     positions: z.array(z.object({
@@ -46,9 +46,9 @@ const projects = defineCollection({
     description: z.string(),
     cover: image(),
     links: z.object({
-      github: z.string().url().optional(),
-      live: z.string().url().optional(),
-      youtube: z.string().url().optional()
+      github: z.url().optional(),
+      live: z.url().optional(),
+      youtube: z.url().optional()
     })
   })
 })
