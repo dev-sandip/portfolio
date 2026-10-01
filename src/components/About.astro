@@ -2,12 +2,14 @@
 import SectionLayout from "../layouts/SectionLayout.astro"
 import GithubContributions from "./GithubContributions.astro"
 import Social from "./Social.astro"
+import Signature from "./Signature-SVG.astro" 
+// import Signature from "./Signature-Video.astro" 
 ---
 
 <SectionLayout title="Sandip Sapkota">
   <p>
     I am a student and backend developer, building practical skills by 
-    <a href="/projects" class="link">developing</a> scalable web applications and systems.
+    <a href="/projects" class="link">{" "}developing{" "}</a> scalable web applications and systems.
   </p>
 
   <p>
@@ -27,10 +29,12 @@ import Social from "./Social.astro"
 
   <p>
     The above quote is from a 
-    <a href="https://x.com/brian_armstrong/status/1990073384022020290?s=20" target="_blank" rel="noopener noreferrer" class="link">tweet</a> 
+    <a href="https://x.com/brian_armstrong/status/1990073384022020290?s=20" target="_blank" rel="noopener noreferrer" class="link">{ " "}tweet{" "}</a> 
     by 
-    <a href="https://x.com/brian_armstrong/status/1990073384022020290?s=20" target="_blank" rel="noopener noreferrer" class="link">Brian Armstrong</a>.
+    <a href="https://x.com/brian_armstrong/status/1990073384022020290?s=20" target="_blank" rel="noopener noreferrer" class="link">{" "}Brian Armstrong</a>.
   </p>
+
+  <Signature />
 
   <GithubContributions />
   <Social />

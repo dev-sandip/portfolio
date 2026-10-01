@@ -1,0 +1,37 @@
+
+<video
+  class="signature-video"
+  width="458"
+  height="146"
+  autoplay
+  muted
+  loop
+  playsinline
+  preload="auto"
+  aria-label="Sandip Sapkota's signature being written"
+>
+  <source src="/signature.webm" type="video/webm" />
+  <source src="/signature.mp4" type="video/mp4" />
+</video>
+
+<style>
+  .signature-video {
+    display: block;
+    width: min(100%, 16rem);
+    height: auto;
+    pointer-events: none;
+    /* Light theme: flip to black ink, then drop the white background */
+    filter: invert(1);
+    mix-blend-mode: multiply;
+  }
+
+  /* Dark theme: white ink, drop the black background.
+     Change this selector to match how your site switches themes
+     (for example :global(.dark) .signature-video). */
+  @media (prefers-color-scheme: dark) {
+    .signature-video {
+      filter: none;
+      mix-blend-mode: screen;
+    }
+  }
+</style>

@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro"
+
+const description = "Resume of Sandip Sapkota, a backend developer focused on scalable systems and practical projects."
+---
+
+<BaseLayout
+	pageTitle="Resume"
+	description={description}
+	canonicalPath="/resume"
+>
+	<div class="resume-wrap">
+		<object data="/resume.svg" type="image/svg+xml" class="resume" aria-label="Sandip Sapkota's resume">
+			Your browser doesn't support SVG.
+			<a href="/resume.svg" class="link">Download resume</a>
+		</object>
+	</div>
+</BaseLayout>
+
+<style>
+	.resume-wrap {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
+	}
+
+	.resume {
+		width: 100%;
+		max-width: 210mm;
+		/* A4 ratio, so the object doesn't collapse without an explicit height */
+		aspect-ratio: 210 / 297;
+		height: auto;
+	}
+</style>
