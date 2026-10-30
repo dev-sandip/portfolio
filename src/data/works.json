@@ -9,7 +9,7 @@
       {
         "title": "Backend Developer",
         "startDate": "Oct 2025",
-        "endDate":" Dec 2025",
+        "endDate": " Dec 2025",
         "description": "- Developing backend services for high-traffic e-commerce platforms\n- Working with **Node.js** and **PostgreSQL** for scalable systems\n- Designing efficient APIs and handling real-world production challenges"
       }
     ]
@@ -29,7 +29,7 @@
       },
       {
         "title": "Node.js Intern",
-       "startDate": "Jun 2024",
+        "startDate": "Jun 2024",
         "endDate": "Feb 2025",
         "description": "- Assisted in building RESTful APIs and microservices\n- Used **Express.js** and **MongoDB** in client projects\n- Gained foundational backend development experience"
       }
